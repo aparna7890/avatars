@@ -71,3 +71,15 @@ docker compose watch
 ```
 docker compose alpha viz
 ```
+## DevOps Mini Project
+
+This project builds on the Docker Samples Avatar Generator.
+
+Our goal is to implement automated testing, Docker image builds, and image publishing using GitHub Actions, followed by repeatable local deployment with Docker Compose.
+
+Current progress:
+- Started the frontend and API locally using Docker Compose.
+- Verified that avatar customization works.
+- Confirmed that the API returns avatar configuration data.
+
+Original project: https://github.com/dockersamples/avatars
