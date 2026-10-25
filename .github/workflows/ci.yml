@@ -1,0 +1,36 @@
+name: Avatar CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Download repository code
+        uses: actions/checkout@v6
+
+      - name: Build and start containers
+        run: docker compose up -d --build
+
+      - name: Run API tests
+        run: docker compose exec -T api python -m unittest discover -s api -p "test_*.py" -v
+
+      - name: Check frontend build
+        run: docker compose exec -T web yarn build
+
+      - name: Show logs if a step fails
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down
