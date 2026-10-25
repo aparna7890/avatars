@@ -34,3 +34,43 @@ jobs:
       - name: Stop containers
         if: always()
         run: docker compose down
+
+  publish:
+    needs: test-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        component: [api, web]
+
+    env:
+      IMAGE: ghcr.io/aparna7890/avatars-${{ matrix.component }}
+      TAG: ${{ github.sha }}
+
+    steps:
+      - name: Download repository code
+        uses: actions/checkout@v6
+
+      - name: Sign in to GitHub Container Registry
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GH_TOKEN" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build versioned image
+        run: |
+          docker build \
+            --file deploy/${{ matrix.component }}.dockerfile \
+            --tag "$IMAGE:$TAG" \
+            --tag "$IMAGE:latest" \
+            .
+
+      - name: Publish image
+        run: |
+          docker push "$IMAGE:$TAG"
+          docker push "$IMAGE:latest"
