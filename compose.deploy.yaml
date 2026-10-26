@@ -1,0 +1,30 @@
+name: avatars
+
+# Run published images only. No source build or development file mounts.
+services:
+  api:
+    image: ghcr.io/aparna7890/avatars-api:${AVATAR_IMAGE_TAG:-latest}
+    ports:
+      - "127.0.0.1:5734:80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1/ready', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  web:
+    image: ghcr.io/aparna7890/avatars-web:${AVATAR_IMAGE_TAG:-latest}
+    ports:
+      - "127.0.0.1:5735:5173"
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5173').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
