@@ -1,0 +1,6 @@
+PASS: Frontend serves HTML.
+PASS: API is ready.
+PASS: API returns customization options.
+PASS: Avatar generation returns valid SVG.
+PASS: Frontend routes requests to the API.
+All 5 deployment checks passed.
